@@ -26,6 +26,14 @@ enum atbm_bh_pm_state {
         ATBM_APOLLO_BH_SUSPENDED,
         ATBM_APOLLO_BH_RESUME,
 };
+enum atbm_rx_frame_type{
+	ATBM_RX_RAW_FRAME = 1,
+	ATBM_RX_DERICTLY_DATA_FRAME,
+	ATBM_RX_SLOW_MGMT_FRAME,
+	ATBM_RX_WSM_CMD_FRAME,
+	ATBM_RX_WSM_DATA_FRAME,
+	ATBM_RX_WSM_FREE,
+};
 #include "bh_usb.h"
 
 int atbm_register_bh(struct atbm_common *hw_priv);
@@ -50,10 +58,6 @@ void atbm_get_cca_work(struct work_struct *work);
 u16 atbm_CalCheckSum(const u8 *data,u16 len);
 void atbm_packetId_to_seq(struct atbm_common *hw_priv,u32 packetId);
 int atbm_seq_to_packetId(struct atbm_common *hw_priv,u32 seq);
-#endif
-#ifdef ATBM_PRIVATE_IE
-void atbm_set_channel_work(struct work_struct *work);
-void atbm_channel_timer(unsigned long arg);
 #endif
 static inline int atbm_bh_is_term(struct atbm_common *hw_priv){
 	if((hw_priv->bh_thread==NULL) || (hw_priv->bh_error==1)||(atomic_read(&hw_priv->atbm_pluged)==0)){
@@ -112,19 +116,23 @@ static inline bool atbm_cancle_delayed_work(struct delayed_work *dwork,bool sync
 })
 static inline void atbm_ieee80211_rx(struct ieee80211_hw	*hw,struct sk_buff *skb)
 {
-	#ifdef IEEE80211_TASKLET
+#ifdef IEEE80211_TASKLET
 	ieee80211_rx_irqsafe(hw,skb);	
-	#else
-	ieee80211_rx_ni(hw,skb);
-	#endif
+#else	
+	if(skb->pkt_type == ATBM_RX_DERICTLY_DATA_FRAME){
+		ieee80211_rx_irqsafe(hw,skb);
+	}else if(softirq_count() == 0){
+		skb->pkt_type = 0;
+		ieee80211_rx_ni(hw,skb);
+	}else  {
+		skb->pkt_type = 0;
+		ieee80211_rx(hw,skb);
+	}
+#endif
 }
 
 static inline void atbm_ieee80211_tx_status(struct ieee80211_hw	*hw,struct sk_buff *skb)
 {
-	#ifdef IEEE80211_TASKLET
-	ieee80211_tx_status_irqsafe(hw,skb);	
-	#else
 	ieee80211_tx_status_ni(hw,skb);
-	#endif
 }
 #endif /* ATBM_APOLLO_BH_H */

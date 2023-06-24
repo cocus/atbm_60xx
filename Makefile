@@ -83,7 +83,21 @@ ifeq ($(CONFIG_ATBM_APOLLO),)
 CONFIG_ATBM_APOLLO=m
 endif
 export
-ATBM_WIFI__EXT_CCFLAGS = -DATBM_WIFI_PLATFORM=23
+############################################
+# Ingenic T31 changes for 603x
+
+CONFIG_ATHENAB=n
+CONFIG_ARESB=y
+CONFIG_ARES=n
+
+export
+SWRATECTRL = y
+CONFIG_PM = y
+
+# this is the Ingenic T31 platform
+ATBM_WIFI__EXT_CCFLAGS = -DATBM_WIFI_PLATFORM=22
+# this needs to be set to true, otherwise a lot of missing symbols
+CONFIG_ATBM_APOLLO_DEBUG=y
 ############################################
 export
 include $(src)/Makefile.build.kernel
