@@ -95,7 +95,7 @@ static u8 atbm_mac_default[ATBM_WIFI_MAX_VIFS][ETH_ALEN] = {
 	{0x00, 0x12, 0x34, 0x00, 0x00, 0x00},
 	{0x00, 0x12, 0x34, 0x00, 0x00, 0x01},
 };
-#if 0
+#if 1
 module_param_array_named(macaddr, atbm_mac_default[0], byte, NULL, S_IRUGO);
 module_param_array_named(macaddr2, atbm_mac_default[1], byte, NULL, S_IRUGO);
 MODULE_PARM_DESC(macaddr, "First MAC address");

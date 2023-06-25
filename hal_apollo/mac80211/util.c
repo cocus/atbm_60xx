@@ -2542,10 +2542,13 @@ exit:
 char *ieee80211_alloc_name(struct ieee80211_hw *hw,const char *name)
 {
 	struct ieee80211_local *local = hw_to_local(hw);
-	const char *phy_name = wiphy_name(local->hw.wiphy);
-	char *new_name = NULL;
-	int alloc_name_len = strlen(name)+strlen(phy_name)+2/*'-' + 0*/;
 	char *alloc_name = NULL;
+	char *new_name = NULL;
+	int alloc_name_len = 0;
+	const char *phy_name = wiphy_name(local->hw.wiphy);
+	atbm_printk_init("allocname '%s', name pointer is %p, phy_name '%s' pointer is %p\n", name ? name : "null", name, phy_name?phy_name : "null", phy_name);
+	alloc_name_len = strlen(name) + 1;
+	alloc_name_len += (phy_name ? strlen(phy_name) + 1 : 0);
 
 #ifdef CONFIG_ATBM_NOT_REALLOC_NAME
 	alloc_name = ieee8211_find_name(hw,name);
@@ -2583,9 +2586,13 @@ char *ieee80211_alloc_name(struct ieee80211_hw *hw,const char *name)
 	/*
 	*phy_name-name
 	*/
-	memcpy(alloc_name,phy_name,strlen(phy_name));
-	alloc_name[strlen(phy_name)] = '-';
-	memcpy(alloc_name+strlen(phy_name)+1,name,strlen(name)+1);
+	if (phy_name) {
+		memcpy(alloc_name,phy_name,strlen(phy_name));
+		alloc_name[strlen(phy_name)] = '-';
+		memcpy(alloc_name+strlen(phy_name)+1,name,strlen(name)+1);
+	} else {
+		memcpy(alloc_name,name,strlen(name));
+	}
 
 	local->ieee80211_name_base = new_name;
 	local->ieee80211_name_len += alloc_name_len;

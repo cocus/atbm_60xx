@@ -93,6 +93,8 @@ CONFIG_ARES=n
 export
 SWRATECTRL = y
 CONFIG_PM = y
+LOAD_FW_H = y
+NOTXCONFIRM = y
 
 # this is the Ingenic T31 platform
 ATBM_WIFI__EXT_CCFLAGS = -DATBM_WIFI_PLATFORM=22
